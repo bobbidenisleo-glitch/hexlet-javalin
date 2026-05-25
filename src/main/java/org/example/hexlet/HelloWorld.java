@@ -4,50 +4,68 @@ import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
-import org.example.hexlet.model.Course;
-import org.example.hexlet.dto.courses.CoursePage;
-import org.example.hexlet.dto.courses.CoursesPage;
+import gg.jte.ContentType;
+import gg.jte.TemplateEngine;
+import gg.jte.resolve.DirectoryCodeResolver;
 
-import java.util.ArrayList;
+import org.example.hexlet.model.User;
+import org.example.hexlet.dto.users.UserPage;
+import org.example.hexlet.dto.users.UsersPage;
+
+import java.nio.file.Path;
 import java.util.List;
 
-public class HelloWorld {
+public final class HelloWorld {
+
+    private static final List<User> USERS = List.of(
+        new User(1L, "Иван", "Иванов", "ivan@example.com"),
+        new User(2L, "Мария", "Петрова", "maria@example.com"),
+        new User(3L, "Алексей", "Сидоров", "alex@example.com")
+    );
+
     public static void main(String[] args) {
-        // Создаём тестовые данные
-        List<Course> courses = new ArrayList<>();
-        courses.add(new Course(1L, "Java: Введение в ООП", "Изучите основы объектно-ориентированного программирования на Java"));
-        courses.add(new Course(2L, "Java: Spring Boot", "Создавайте веб-приложения с помощью Spring Boot"));
-        courses.add(new Course(3L, "JavaScript: React", "Освойте современную разработку интерфейсов на React"));
-        
+        var sourceDir = Path.of("src/main/jte");
+        var targetDir = Path.of("jte-classes");
+        var codeResolver = new DirectoryCodeResolver(sourceDir);
+        var templateEngine = TemplateEngine.create(codeResolver, targetDir, ContentType.Html);
+
         var app = Javalin.create(config -> {
             config.bundledPlugins.enableDevLogging();
-            config.fileRenderer(new JavalinJte());
+            config.fileRenderer(new JavalinJte(templateEngine));
         });
-        
-        // Главная страница (список курсов)
-        app.get("/courses", ctx -> {
-            var header = "Курсы по программированию";
-            var page = new CoursesPage(courses, header);
-            ctx.render("index.jte", model("page", page));
+
+        // Главная страница
+        app.get("/", ctx -> {
+            ctx.render("index.jte");
         });
-        
-        // Страница конкретного курса
-        app.get("/courses/{id}", ctx -> {
-            Long id = Long.parseLong(ctx.pathParam("id"));
-            Course course = courses.stream()
-                .filter(c -> c.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-            
-            if (course == null) {
-                ctx.status(404).result("Курс не найден");
-                return;
+
+        // Список пользователей
+        app.get("/users", ctx -> {
+            UsersPage page = new UsersPage(USERS, "Список пользователей");
+            ctx.render("users/index.jte", model("page", page));
+        });
+
+        // Просмотр пользователя
+        app.get("/users/{id}", ctx -> {
+            try {
+                Long id = Long.parseLong(ctx.pathParam("id"));
+                User user = USERS.stream()
+                    .filter(u -> u.getId().equals(id))
+                    .findFirst()
+                    .orElse(null);
+                
+                if (user == null) {
+                    ctx.status(404).result("User not found");
+                    return;
+                }
+                
+                UserPage page = new UserPage(user);
+                ctx.render("users/show.jte", model("page", page));
+            } catch (NumberFormatException e) {
+                ctx.status(404).result("User not found");
             }
-            
-            var page = new CoursePage(course);
-            ctx.render("courses/show.jte", model("page", page));
         });
-        
+
         app.start(7070);
     }
 }
