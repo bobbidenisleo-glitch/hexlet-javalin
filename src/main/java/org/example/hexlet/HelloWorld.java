@@ -13,15 +13,17 @@ public class HelloWorld {
         app.get("/users", ctx -> ctx.result("GET /users"));
         app.post("/users", ctx -> ctx.result("POST /users"));
         app.get("/about", ctx -> ctx.result("О нас"));
-        
-        // НОВЫЙ ОБРАБОТЧИК для /hello
         app.get("/hello", ctx -> {
-            // Получаем параметр name, если нет - используем "World"
             String name = ctx.queryParamAsClass("name", String.class)
                                 .getOrDefault("World");
-            
-            // Возвращаем приветствие
             ctx.result("Hello, " + name + "!");
+        });
+        
+        // НОВЫЙ ОБРАБОТЧИК с множественными параметрами
+        app.get("/users/{id}/post/{postId}", ctx -> {
+            String userId = ctx.pathParam("id");
+            String postId = ctx.pathParam("postId");
+            ctx.result("User ID: " + userId + ", Post ID: " + postId);
         });
         
         app.start(7070);
