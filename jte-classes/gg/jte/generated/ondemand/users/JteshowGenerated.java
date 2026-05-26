@@ -2,24 +2,21 @@ package gg.jte.generated.ondemand.users;
 import org.example.hexlet.dto.users.UserPage;
 public final class JteshowGenerated {
 	public static final String JTE_NAME = "users/show.jte";
-	public static final int[] JTE_LINE_INFO = {0,0,1,1,1,3,3,5,5,9,9,9,10,10,10,11,11,11,12,12,12,16,16,16,17,17,17,1,1,1,1};
+	public static final int[] JTE_LINE_INFO = {0,0,1,1,1,3,3,5,5,10,10,10,13,13,13,16,16,16,21,21,21,22,22,22,1,1,1,1};
 	public static void render(gg.jte.html.HtmlTemplateOutput jteOutput, gg.jte.html.HtmlInterceptor jteHtmlInterceptor, UserPage page) {
 		jteOutput.writeContent("\n");
 		gg.jte.generated.ondemand.layout.JtepageGenerated.render(jteOutput, jteHtmlInterceptor, new gg.jte.html.HtmlContent() {
 			public void writeTo(gg.jte.html.HtmlTemplateOutput jteOutput) {
-				jteOutput.writeContent("\n        <h1>Информация о пользователе</h1>\n        \n        <div style=\"border: 1px solid #ddd; border-radius: 8px; padding: 20px; background-color: #f9f9f9;\">\n            <div style=\"margin: 10px 0;\"><strong>ID:</strong> ");
+				jteOutput.writeContent("\n        <h1>Информация о пользователе</h1>\n        \n        <div style=\"border: 1px solid #ddd; border-radius: 8px; padding: 20px; background-color: #f9f9f9;\">\n            <div style=\"margin: 10px 0;\">\n                <strong>ID:</strong> ");
 				jteOutput.setContext("div", null);
 				jteOutput.writeUserContent(page.getUser().getId());
-				jteOutput.writeContent("</div>\n            <div style=\"margin: 10px 0;\"><strong>Имя:</strong> ");
+				jteOutput.writeContent("\n            </div>\n            <div style=\"margin: 10px 0;\">\n                <strong>Имя:</strong> ");
 				jteOutput.setContext("div", null);
-				jteOutput.writeUserContent(page.getUser().getFirstName());
-				jteOutput.writeContent("</div>\n            <div style=\"margin: 10px 0;\"><strong>Фамилия:</strong> ");
-				jteOutput.setContext("div", null);
-				jteOutput.writeUserContent(page.getUser().getLastName());
-				jteOutput.writeContent("</div>\n            <div style=\"margin: 10px 0;\"><strong>Email:</strong> ");
+				jteOutput.writeUserContent(page.getUser().getName());
+				jteOutput.writeContent("\n            </div>\n            <div style=\"margin: 10px 0;\">\n                <strong>Email:</strong> ");
 				jteOutput.setContext("div", null);
 				jteOutput.writeUserContent(page.getUser().getEmail());
-				jteOutput.writeContent("</div>\n        </div>\n        \n        <a href=\"/users\" style=\"display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background-color: #6c757d; color: #fff; text-decoration: none; border-radius: 4px;\">← Назад к списку</a>\n    ");
+				jteOutput.writeContent("\n            </div>\n        </div>\n        \n        <a href=\"/users\" style=\"display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background-color: #6c757d; color: #fff; text-decoration: none; border-radius: 4px;\">← Назад к списку</a>\n    ");
 			}
 		});
 		jteOutput.writeContent("\n");

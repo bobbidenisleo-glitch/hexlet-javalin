@@ -3,31 +3,39 @@
 
 @template.layout.page(
     content = @`
-        <h1>${page.getHeader()}</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>Список пользователей</h1>
+            <a href="/users/build" style="background-color: #28a745; color: white; padding: 8px 12px; text-decoration: none; border-radius: 4px;">➕ Добавить пользователя</a>
+        </div>
         
-        <a href="/users/build" style="display: inline-block; margin-bottom: 1rem; padding: 0.5rem 1rem; background-color: #28a745; color: #fff; text-decoration: none; border-radius: 4px;">➕ Создать пользователя</a>
+        <form method="get" action="/users" style="margin-bottom: 20px;">
+            <label for="term">Фильтр по имени:</label>
+            <input type="text" id="term" name="term" value="${page.getTerm() != null ? page.getTerm() : ""}" placeholder="Введите начало имени...">
+            <button type="submit">Найти</button>
+            @if(page.getTerm() != null && !page.getTerm().isEmpty())
+                <a href="/users">Сбросить</a>
+            @endif
+        </form>
         
         @if(page.getUsers().isEmpty())
-            <p>Пока не добавлено ни одного пользователя</p>
+            <p>Пользователи не найдены</p>
         @else
-            <table style="width: 100%; border-collapse: collapse;">
+            <table border="1" style="border-collapse: collapse; width: 100%;">
                 <thead>
                     <tr style="background-color: #f2f2f2;">
-                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">ID</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Имя</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Фамилия</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Email</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Действие</th>
+                        <th style="padding: 8px;">ID</th>
+                        <th style="padding: 8px;">Имя</th>
+                        <th style="padding: 8px;">Email</th>
+                        <th style="padding: 8px;">Действие</th>
                     </tr>
                 </thead>
                 <tbody>
                     @for(var user : page.getUsers())
-                        <tr style="border-bottom: 1px solid #ddd;">
-                            <td style="padding: 12px;">${user.getId()}</td>
-                            <td style="padding: 12px;">${user.getFirstName()}</td>
-                            <td style="padding: 12px;">${user.getLastName()}</td>
-                            <td style="padding: 12px;">${user.getEmail()}</td>
-                            <td style="padding: 12px;"><a href="/users/${user.getId()}" style="color: #007bff; text-decoration: none;">Просмотр</a></td>
+                        <tr>
+                            <td style="padding: 8px;">${user.getId()}</td>
+                            <td style="padding: 8px;">${user.getName()}</td>
+                            <td style="padding: 8px;">${user.getEmail()}</td>
+                            <td style="padding: 8px;"><a href="/users/${user.getId()}">Просмотр</a></td>
                         </tr>
                     @endfor
                 </tbody>
