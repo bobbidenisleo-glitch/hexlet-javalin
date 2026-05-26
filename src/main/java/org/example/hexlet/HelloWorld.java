@@ -33,19 +33,19 @@ public final class HelloWorld {
             config.fileRenderer(new JavalinJte(templateEngine));
         });
 
-        // Главная страница
-        app.get("/", ctx -> {
+        // ========== ГЛАВНАЯ СТРАНИЦА ==========
+        app.get(NamedRoutes.rootPath(), ctx -> {
             ctx.render("index.jte");
         });
 
-        // GET /users/build - форма создания пользователя
-        app.get("/users/build", ctx -> {
+        // ========== ФОРМА СОЗДАНИЯ ПОЛЬЗОВАТЕЛЯ ==========
+        app.get(NamedRoutes.buildUserPath(), ctx -> {
             BuildUserPage page = new BuildUserPage();
             ctx.render("users/build.jte", model("page", page));
         });
 
-        // POST /users - обработка формы
-        app.post("/users", ctx -> {
+        // ========== ОБРАБОТЧИК СОЗДАНИЯ ПОЛЬЗОВАТЕЛЯ ==========
+        app.post(NamedRoutes.usersPath(), ctx -> {
             String firstName = ctx.formParam("firstName");
             String lastName = ctx.formParam("lastName");
             String email = ctx.formParam("email");
@@ -53,7 +53,7 @@ public final class HelloWorld {
             String passwordConfirmation = ctx.formParam("passwordConfirmation");
             
             try {
-                // Валидация
+                // Валидация имени
                 String validFirstName = ctx.formParamAsClass("firstName", String.class)
                     .check(value -> value != null && !value.trim().isEmpty(), "Имя обязательно")
                     .get();
@@ -61,6 +61,7 @@ public final class HelloWorld {
                 validFirstName = validFirstName.substring(0, 1).toUpperCase() + 
                                 validFirstName.substring(1).toLowerCase();
                 
+                // Валидация фамилии
                 String validLastName = ctx.formParamAsClass("lastName", String.class)
                     .check(value -> value != null && !value.trim().isEmpty(), "Фамилия обязательна")
                     .get();
@@ -68,6 +69,7 @@ public final class HelloWorld {
                 validLastName = validLastName.substring(0, 1).toUpperCase() + 
                                validLastName.substring(1).toLowerCase();
                 
+                // Валидация email
                 String validEmail = ctx.formParamAsClass("email", String.class)
                     .check(value -> value != null && !value.trim().isEmpty(), "Email обязателен")
                     .check(value -> {
@@ -77,6 +79,7 @@ public final class HelloWorld {
                     .get();
                 validEmail = validEmail.trim().toLowerCase();
                 
+                // Валидация пароля
                 String validPassword = ctx.formParamAsClass("password", String.class)
                     .check(value -> value != null && value.length() >= 6, "Пароль должен содержать минимум 6 символов")
                     .check(value -> value != null && value.equals(passwordConfirmation), "Пароли не совпадают")
@@ -87,7 +90,7 @@ public final class HelloWorld {
                 User user = new User(validFirstName, validLastName, validEmail, encryptedPassword);
                 UserRepository.save(user);
                 
-                ctx.redirect("/users");
+                ctx.redirect(NamedRoutes.usersPath());
                 
             } catch (ValidationException e) {
                 BuildUserPage page = new BuildUserPage(firstName, lastName, email, e.getErrors());
@@ -96,15 +99,15 @@ public final class HelloWorld {
             }
         });
 
-        // Список пользователей
-        app.get("/users", ctx -> {
+        // ========== СПИСОК ПОЛЬЗОВАТЕЛЕЙ ==========
+        app.get(NamedRoutes.usersPath(), ctx -> {
             List<User> users = UserRepository.getEntities();
             UsersPage page = new UsersPage(users);
             ctx.render("users/index.jte", model("page", page));
         });
 
-        // Просмотр одного пользователя
-        app.get("/users/{id}", ctx -> {
+        // ========== ПРОСМОТР ПОЛЬЗОВАТЕЛЯ ==========
+        app.get(NamedRoutes.userPath("{id}"), ctx -> {
             Long id = Long.parseLong(ctx.pathParam("id"));
             User user = UserRepository.find(id)
                 .orElseThrow(() -> new NotFoundResponse("User not found"));
