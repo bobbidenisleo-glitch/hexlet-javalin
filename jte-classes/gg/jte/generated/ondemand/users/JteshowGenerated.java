@@ -2,7 +2,7 @@ package gg.jte.generated.ondemand.users;
 import org.example.hexlet.dto.users.UserPage;
 public final class JteshowGenerated {
 	public static final String JTE_NAME = "users/show.jte";
-	public static final int[] JTE_LINE_INFO = {0,0,1,1,1,3,3,5,5,10,10,10,13,13,13,16,16,16,21,21,21,22,22,22,1,1,1,1};
+	public static final int[] JTE_LINE_INFO = {0,0,1,1,1,3,3,5,5,10,10,10,13,13,13,16,16,16,19,19,19,24,24,24,25,25,25,1,1,1,1};
 	public static void render(gg.jte.html.HtmlTemplateOutput jteOutput, gg.jte.html.HtmlInterceptor jteHtmlInterceptor, UserPage page) {
 		jteOutput.writeContent("\n");
 		gg.jte.generated.ondemand.layout.JtepageGenerated.render(jteOutput, jteHtmlInterceptor, new gg.jte.html.HtmlContent() {
@@ -12,7 +12,10 @@ public final class JteshowGenerated {
 				jteOutput.writeUserContent(page.getUser().getId());
 				jteOutput.writeContent("\n            </div>\n            <div style=\"margin: 10px 0;\">\n                <strong>Имя:</strong> ");
 				jteOutput.setContext("div", null);
-				jteOutput.writeUserContent(page.getUser().getName());
+				jteOutput.writeUserContent(page.getUser().getFirstName());
+				jteOutput.writeContent("\n            </div>\n            <div style=\"margin: 10px 0;\">\n                <strong>Фамилия:</strong> ");
+				jteOutput.setContext("div", null);
+				jteOutput.writeUserContent(page.getUser().getLastName());
 				jteOutput.writeContent("\n            </div>\n            <div style=\"margin: 10px 0;\">\n                <strong>Email:</strong> ");
 				jteOutput.setContext("div", null);
 				jteOutput.writeUserContent(page.getUser().getEmail());

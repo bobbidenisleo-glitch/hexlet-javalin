@@ -5,18 +5,12 @@ import java.util.List;
 
 public class UsersPage {
     private List<User> users;
-    private String term;
 
-    public UsersPage(List<User> users, String term) {
+    public UsersPage(List<User> users) {
         this.users = users;
-        this.term = term;
     }
 
     public List<User> getUsers() {
         return users;
-    }
-
-    public String getTerm() {
-        return term;
     }
 }

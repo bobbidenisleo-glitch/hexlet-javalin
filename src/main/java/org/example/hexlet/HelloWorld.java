@@ -3,6 +3,7 @@ package org.example.hexlet;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
 import io.javalin.http.NotFoundResponse;
+import io.javalin.validation.ValidationException;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 import gg.jte.ContentType;
@@ -13,6 +14,8 @@ import org.example.hexlet.model.User;
 import org.example.hexlet.repository.UserRepository;
 import org.example.hexlet.dto.users.UserPage;
 import org.example.hexlet.dto.users.UsersPage;
+import org.example.hexlet.dto.users.BuildUserPage;
+import org.example.hexlet.util.Security;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -35,61 +38,68 @@ public final class HelloWorld {
             ctx.render("index.jte");
         });
 
-        // ========== РАБОТА С ПОЛЬЗОВАТЕЛЯМИ ==========
-        
-        // Форма создания пользователя
+        // GET /users/build - форма создания пользователя
         app.get("/users/build", ctx -> {
-            ctx.render("users/build.jte");
+            BuildUserPage page = new BuildUserPage();
+            ctx.render("users/build.jte", model("page", page));
         });
 
-        // Обработчик создания пользователя (POST)
+        // POST /users - обработка формы
         app.post("/users", ctx -> {
-            String name = ctx.formParam("name");
+            String firstName = ctx.formParam("firstName");
+            String lastName = ctx.formParam("lastName");
             String email = ctx.formParam("email");
             String password = ctx.formParam("password");
             String passwordConfirmation = ctx.formParam("passwordConfirmation");
-
-            // Нормализация
-            if (name != null) {
-                name = name.trim();
+            
+            try {
+                // Валидация
+                String validFirstName = ctx.formParamAsClass("firstName", String.class)
+                    .check(value -> value != null && !value.trim().isEmpty(), "Имя обязательно")
+                    .get();
+                validFirstName = validFirstName.trim();
+                validFirstName = validFirstName.substring(0, 1).toUpperCase() + 
+                                validFirstName.substring(1).toLowerCase();
+                
+                String validLastName = ctx.formParamAsClass("lastName", String.class)
+                    .check(value -> value != null && !value.trim().isEmpty(), "Фамилия обязательна")
+                    .get();
+                validLastName = validLastName.trim();
+                validLastName = validLastName.substring(0, 1).toUpperCase() + 
+                               validLastName.substring(1).toLowerCase();
+                
+                String validEmail = ctx.formParamAsClass("email", String.class)
+                    .check(value -> value != null && !value.trim().isEmpty(), "Email обязателен")
+                    .check(value -> {
+                        String emailValue = value.trim().toLowerCase();
+                        return UserRepository.findByEmail(emailValue).isEmpty();
+                    }, "Пользователь с таким email уже существует")
+                    .get();
+                validEmail = validEmail.trim().toLowerCase();
+                
+                String validPassword = ctx.formParamAsClass("password", String.class)
+                    .check(value -> value != null && value.length() >= 6, "Пароль должен содержать минимум 6 символов")
+                    .check(value -> value != null && value.equals(passwordConfirmation), "Пароли не совпадают")
+                    .get();
+                
+                String encryptedPassword = Security.encrypt(validPassword);
+                
+                User user = new User(validFirstName, validLastName, validEmail, encryptedPassword);
+                UserRepository.save(user);
+                
+                ctx.redirect("/users");
+                
+            } catch (ValidationException e) {
+                BuildUserPage page = new BuildUserPage(firstName, lastName, email, e.getErrors());
+                ctx.render("users/build.jte", model("page", page));
+                ctx.status(422);
             }
-            if (email != null) {
-                email = email.trim().toLowerCase();
-            }
-
-            // Валидация
-            if (name == null || name.isEmpty()) {
-                ctx.status(400).result("Имя обязательно");
-                return;
-            }
-            if (email == null || email.isEmpty()) {
-                ctx.status(400).result("Email обязателен");
-                return;
-            }
-            if (password == null || !password.equals(passwordConfirmation)) {
-                ctx.status(400).result("Пароли не совпадают");
-                return;
-            }
-
-            User user = new User(name, email, password);
-            UserRepository.save(user);
-
-            ctx.redirect("/users");
         });
 
-        // Список пользователей (с фильтрацией)
+        // Список пользователей
         app.get("/users", ctx -> {
-            String term = ctx.queryParam("term");
-            
             List<User> users = UserRepository.getEntities();
-            
-            if (term != null && !term.isEmpty()) {
-                users = users.stream()
-                    .filter(user -> user.getName().toLowerCase().startsWith(term.toLowerCase()))
-                    .toList();
-            }
-            
-            UsersPage page = new UsersPage(users, term);
+            UsersPage page = new UsersPage(users);
             ctx.render("users/index.jte", model("page", page));
         });
 
@@ -101,43 +111,6 @@ public final class HelloWorld {
             
             UserPage page = new UserPage(user);
             ctx.render("users/show.jte", model("page", page));
-        });
-
-        // ========== СТАРЫЕ МАРШРУТЫ (можно удалить или оставить) ==========
-        app.get("/about", ctx -> {
-            ctx.result("О нас");
-        });
-
-        app.get("/hello", ctx -> {
-            String name = ctx.queryParamAsClass("name", String.class)
-                                .getOrDefault("World");
-            ctx.result("Hello, " + name + "!");
-        });
-
-        app.get("/users/{id}/post/{postId}", ctx -> {
-            String userId = ctx.pathParam("id");
-            String postId = ctx.pathParam("postId");
-            ctx.result("User ID: " + userId + ", Post ID: " + postId);
-        });
-
-        app.get("/xss-test", ctx -> {
-            String userInput = ctx.queryParam("q");
-            if (userInput == null) userInput = "empty";
-            ctx.contentType("text/html");
-            ctx.result("<h1>" + userInput + "</h1>");
-        });
-
-        app.get("/xss-safe", ctx -> {
-            String userInput = ctx.queryParam("q");
-            if (userInput == null) userInput = "empty";
-            String escaped = userInput
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&#39;");
-            ctx.contentType("text/html");
-            ctx.result("<h1>" + escaped + "</h1>");
         });
 
         app.start(7070);

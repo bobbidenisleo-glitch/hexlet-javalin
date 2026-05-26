@@ -10,7 +10,10 @@
                 <strong>ID:</strong> ${page.getUser().getId()}
             </div>
             <div style="margin: 10px 0;">
-                <strong>Имя:</strong> ${page.getUser().getName()}
+                <strong>Имя:</strong> ${page.getUser().getFirstName()}
+            </div>
+            <div style="margin: 10px 0;">
+                <strong>Фамилия:</strong> ${page.getUser().getLastName()}
             </div>
             <div style="margin: 10px 0;">
                 <strong>Email:</strong> ${page.getUser().getEmail()}

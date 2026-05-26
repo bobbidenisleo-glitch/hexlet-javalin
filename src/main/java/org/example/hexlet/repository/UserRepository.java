@@ -29,4 +29,10 @@ public class UserRepository {
     public static void delete(Long id) {
         entities.removeIf(user -> user.getId().equals(id));
     }
+
+    public static Optional<User> findByEmail(String email) {
+        return entities.stream()
+            .filter(user -> user.getEmail().equals(email))
+            .findFirst();
+    }
 }
