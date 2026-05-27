@@ -8,6 +8,7 @@ import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.DirectoryCodeResolver;
 
+import org.example.hexlet.controller.SessionsController;
 import org.example.hexlet.dto.MainPage;
 
 import java.nio.file.Path;
@@ -25,18 +26,16 @@ public final class HelloWorld {
             config.fileRenderer(new JavalinJte(templateEngine));
         });
 
-        // Главная страница с проверкой куки
-        app.get("/", ctx -> {
-            // Читаем куку "visited" (по умолчанию false)
-            String visitedCookie = ctx.cookie("visited");
-            boolean visited = Boolean.parseBoolean(visitedCookie);
-            
-            // Создаём страницу с информацией о посещении
-            MainPage page = new MainPage(visited);
+        // Сессии (логин/выход)
+        app.get(NamedRoutes.buildSessionPath(), SessionsController::build);
+        app.post(NamedRoutes.sessionsPath(), SessionsController::create);
+        app.delete(NamedRoutes.sessionsPath(), SessionsController::destroy);
+
+        // Главная страница (с информацией о текущем пользователе)
+        app.get(NamedRoutes.rootPath(), ctx -> {
+            String currentUser = ctx.sessionAttribute("currentUser");
+            MainPage page = new MainPage(currentUser);
             ctx.render("index.jte", model("page", page));
-            
-            // Устанавливаем куку "visited" для следующих посещений
-            ctx.cookie("visited", String.valueOf(true));
         });
 
         app.start(7070);
