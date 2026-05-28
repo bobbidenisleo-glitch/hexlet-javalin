@@ -10,3 +10,6 @@ RUN ./gradlew clean shadowJar
 RUN ls -la /app/build/libs/
 
 CMD java -jar build/libs/HexletJavalin-all.jar
+
+
+
