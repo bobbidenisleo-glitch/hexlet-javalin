@@ -1,7 +1,7 @@
 @import gg.jte.Content
 @param Content content
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
@@ -20,6 +20,11 @@
         .footer { background-color: #333; color: #fff; text-align: center; padding: 1rem 0; margin-top: 2rem; }
         .footer a { color: #fff; text-decoration: none; }
         .footer a:hover { text-decoration: underline; }
+        
+        /* Стили для флеш-сообщений */
+        .alert { padding: 12px; border-radius: 4px; margin-bottom: 20px; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
 </head>
 <body>

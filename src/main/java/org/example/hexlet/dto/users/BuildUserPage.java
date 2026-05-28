@@ -1,10 +1,11 @@
 package org.example.hexlet.dto.users;
 
+import org.example.hexlet.dto.BasePage;
 import java.util.List;
 import java.util.Map;
 import io.javalin.validation.ValidationError;
 
-public class BuildUserPage {
+public class BuildUserPage extends BasePage {
     private String firstName;
     private String lastName;
     private String email;
@@ -13,7 +14,7 @@ public class BuildUserPage {
     public BuildUserPage() {
     }
 
-    public BuildUserPage(String firstName, String lastName, String email, 
+    public BuildUserPage(String firstName, String lastName, String email,
                          Map<String, List<ValidationError<Object>>> errors) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -21,19 +22,8 @@ public class BuildUserPage {
         this.errors = errors;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public Map<String, List<ValidationError<Object>>> getErrors() {
-        return errors;
-    }
+    public String getFirstName() { return firstName; }
+    public String getLastName() { return lastName; }
+    public String getEmail() { return email; }
+    public Map<String, List<ValidationError<Object>>> getErrors() { return errors; }
 }

@@ -8,8 +8,7 @@ import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.DirectoryCodeResolver;
 
-import org.example.hexlet.controller.SessionsController;
-import org.example.hexlet.dto.MainPage;
+import org.example.hexlet.controller.UsersController;
 
 import java.nio.file.Path;
 
@@ -26,17 +25,16 @@ public final class HelloWorld {
             config.fileRenderer(new JavalinJte(templateEngine));
         });
 
-        // Сессии (логин/выход)
-        app.get(NamedRoutes.buildSessionPath(), SessionsController::build);
-        app.post(NamedRoutes.sessionsPath(), SessionsController::create);
-        app.delete(NamedRoutes.sessionsPath(), SessionsController::destroy);
-
-        // Главная страница (с информацией о текущем пользователе)
+        // Главная страница
         app.get(NamedRoutes.rootPath(), ctx -> {
-            String currentUser = ctx.sessionAttribute("currentUser");
-            MainPage page = new MainPage(currentUser);
-            ctx.render("index.jte", model("page", page));
+            ctx.render("index.jte");
         });
+
+        // Пользователи
+        app.get(NamedRoutes.usersPath(), UsersController::index);
+        app.get(NamedRoutes.buildUserPath(), UsersController::build);
+        app.post(NamedRoutes.usersPath(), UsersController::create);
+        app.get(NamedRoutes.userPath("{id}"), UsersController::show);
 
         app.start(7070);
     }
