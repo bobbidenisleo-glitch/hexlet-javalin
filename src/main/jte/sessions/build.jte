@@ -1,5 +1,4 @@
 @import org.example.hexlet.NamedRoutes
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -7,22 +6,12 @@
     <title>Вход</title>
 </head>
 <body>
-    <h1>Вход в систему</h1>
-    
-    <form action="${NamedRoutes.sessionsPath()}" method="post">
-        <div>
-            <label>Имя пользователя:</label><br>
-            <input type="text" name="nickname" placeholder="Введите nickname" required>
-        </div>
-        <div>
-            <label>Пароль:</label><br>
-            <input type="password" name="password" placeholder="Введите пароль">
-        </div>
+    <h1>Вход</h1>
+    <form action="/sessions" method="post">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Пароль" required>
         <button type="submit">Войти</button>
     </form>
-    
-    <div style="margin-top: 20px;">
-        <a href="/">← На главную</a>
-    </div>
+    <p><a href="/">На главную</a></p>
 </body>
 </html>

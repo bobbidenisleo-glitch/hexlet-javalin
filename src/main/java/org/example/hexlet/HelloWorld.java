@@ -12,6 +12,7 @@ import gg.jte.resolve.DirectoryCodeResolver;
 
 import org.example.hexlet.controller.UsersController;
 import org.example.hexlet.controller.SessionsController;
+import org.example.hexlet.controller.CoursesController;
 import org.example.hexlet.dto.MainPage;
 import org.example.hexlet.model.User;
 import org.example.hexlet.repository.BaseRepository;
@@ -78,6 +79,9 @@ public final class HelloWorld {
         app.get("/users/build", UsersController::build);
         app.post("/users", UsersController::create);
         app.get("/users/{id}", UsersController::show);
+
+        // Курсы
+        app.get("/courses", CoursesController::index);
 
         // Сессии (логин/выход)
         app.get(NamedRoutes.buildSessionPath(), SessionsController::build);
