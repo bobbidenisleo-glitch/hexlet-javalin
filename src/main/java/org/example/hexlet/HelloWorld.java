@@ -67,7 +67,8 @@ public final class HelloWorld {
         // Главная страница
         app.get("/", ctx -> {
             User currentUser = ctx.sessionAttribute("currentUser");
-            MainPage page = new MainPage(currentUser != null ? currentUser.getName() : null);
+            String userName = currentUser != null ? (currentUser.getFirstName() + " " + currentUser.getLastName()) : null;
+            MainPage page = new MainPage(userName);
             ctx.render("index.jte", model("page", page));
         });
 
