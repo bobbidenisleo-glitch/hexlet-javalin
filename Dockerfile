@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY . .
 
-RUN ["./gradlew", "clean", "shadowJar"]
+RUN ./gradlew clean shadowJar
 
-CMD ["java", "-jar", "build/libs/HexletJavalin-all.jar"]
+RUN ls -la /app/build/libs/
+
+CMD java -jar build/libs/HexletJavalin-all.jar
