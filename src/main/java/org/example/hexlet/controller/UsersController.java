@@ -18,21 +18,24 @@ import java.util.List;
 
 public class UsersController {
 
-    public static void index(Context ctx) throws SQLException {
-        List<User> users = UserRepository.getEntities();
-        UsersPage page = new UsersPage(users);
-        
-        String flash = ctx.consumeSessionAttribute("flash");
-        String flashType = ctx.consumeSessionAttribute("flashType");
-        if (flash != null) {
-            page.setFlash(flash);
-            page.setFlashType(flashType);
+    // GET /users - список пользователей
+    public static void index(Context ctx) {
+        try {
+            System.out.println("=== UsersController.index called ===");
+            List<User> users = UserRepository.getEntities();
+            System.out.println("Users count: " + users.size());
+            UsersPage page = new UsersPage(users);
+            System.out.println("Rendering users/index.jte");
+            ctx.render("users/index.jte", model("page", page));
+        } catch (Exception e) {
+            System.out.println("ERROR in UsersController.index: " + e.getMessage());
+            e.printStackTrace();
+            ctx.result("Error: " + e.getMessage());
         }
-        
-        ctx.render("users/index.jte", model("page", page));
     }
 
-    public static void show(Context ctx) throws SQLException {
+    // GET /users/{id} - просмотр пользователя
+    public static void show(Context ctx) {
         Long id = ctx.pathParamAsClass("id", Long.class).get();
         User user = UserRepository.find(id)
             .orElseThrow(() -> new NotFoundResponse("User not found"));
@@ -40,12 +43,14 @@ public class UsersController {
         ctx.render("users/show.jte", model("page", page));
     }
 
+    // GET /users/build - форма создания пользователя
     public static void build(Context ctx) {
         BuildUserPage page = new BuildUserPage();
         ctx.render("users/build.jte", model("page", page));
     }
 
-    public static void create(Context ctx) throws SQLException {
+    // POST /users - создание пользователя
+    public static void create(Context ctx) {
         String firstName = ctx.formParam("firstName");
         String lastName = ctx.formParam("lastName");
         String email = ctx.formParam("email");
@@ -99,6 +104,8 @@ public class UsersController {
             BuildUserPage page = new BuildUserPage(firstName, lastName, email, e.getErrors());
             ctx.render("users/build.jte", model("page", page));
             ctx.status(422);
+        } catch (SQLException e) {
+            ctx.result("Database error: " + e.getMessage());
         }
     }
 }
