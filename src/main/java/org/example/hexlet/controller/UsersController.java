@@ -13,19 +13,17 @@ import org.example.hexlet.dto.users.UsersPage;
 import org.example.hexlet.dto.users.BuildUserPage;
 import org.example.hexlet.util.Security;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class UsersController {
 
-    // GET /users - список пользователей
-    public static void index(Context ctx) {
+    public static void index(Context ctx) throws SQLException {
         List<User> users = UserRepository.getEntities();
         UsersPage page = new UsersPage(users);
         
-        // Читаем и удаляем флеш-сообщение из сессии
         String flash = ctx.consumeSessionAttribute("flash");
         String flashType = ctx.consumeSessionAttribute("flashType");
-        
         if (flash != null) {
             page.setFlash(flash);
             page.setFlashType(flashType);
@@ -34,8 +32,7 @@ public class UsersController {
         ctx.render("users/index.jte", model("page", page));
     }
 
-    // GET /users/{id} - просмотр пользователя
-    public static void show(Context ctx) {
+    public static void show(Context ctx) throws SQLException {
         Long id = ctx.pathParamAsClass("id", Long.class).get();
         User user = UserRepository.find(id)
             .orElseThrow(() -> new NotFoundResponse("User not found"));
@@ -43,14 +40,12 @@ public class UsersController {
         ctx.render("users/show.jte", model("page", page));
     }
 
-    // GET /users/build - форма создания пользователя
     public static void build(Context ctx) {
         BuildUserPage page = new BuildUserPage();
         ctx.render("users/build.jte", model("page", page));
     }
 
-    // POST /users - создание пользователя
-    public static void create(Context ctx) {
+    public static void create(Context ctx) throws SQLException {
         String firstName = ctx.formParam("firstName");
         String lastName = ctx.formParam("lastName");
         String email = ctx.formParam("email");
@@ -58,7 +53,6 @@ public class UsersController {
         String passwordConfirmation = ctx.formParam("passwordConfirmation");
         
         try {
-            // Валидация имени
             String validFirstName = ctx.formParamAsClass("firstName", String.class)
                 .check(value -> value != null && !value.trim().isEmpty(), "Имя обязательно")
                 .get();
@@ -66,7 +60,6 @@ public class UsersController {
             validFirstName = validFirstName.substring(0, 1).toUpperCase() + 
                             validFirstName.substring(1).toLowerCase();
             
-            // Валидация фамилии
             String validLastName = ctx.formParamAsClass("lastName", String.class)
                 .check(value -> value != null && !value.trim().isEmpty(), "Фамилия обязательна")
                 .get();
@@ -74,17 +67,19 @@ public class UsersController {
             validLastName = validLastName.substring(0, 1).toUpperCase() + 
                            validLastName.substring(1).toLowerCase();
             
-            // Валидация email
             String validEmail = ctx.formParamAsClass("email", String.class)
                 .check(value -> value != null && !value.trim().isEmpty(), "Email обязателен")
                 .check(value -> {
-                    String emailValue = value.trim().toLowerCase();
-                    return UserRepository.findByEmail(emailValue).isEmpty();
+                    try {
+                        String emailValue = value.trim().toLowerCase();
+                        return UserRepository.findByEmail(emailValue).isEmpty();
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
                 }, "Пользователь с таким email уже существует")
                 .get();
             validEmail = validEmail.trim().toLowerCase();
             
-            // Валидация пароля
             String validPassword = ctx.formParamAsClass("password", String.class)
                 .check(value -> value != null && value.length() >= 6, "Пароль должен содержать минимум 6 символов")
                 .check(value -> value != null && value.equals(passwordConfirmation), "Пароли не совпадают")
@@ -95,7 +90,6 @@ public class UsersController {
             User user = new User(validFirstName, validLastName, validEmail, encryptedPassword);
             UserRepository.save(user);
             
-            // Устанавливаем флеш-сообщение об успехе
             ctx.sessionAttribute("flash", "Пользователь успешно зарегистрирован!");
             ctx.sessionAttribute("flashType", "success");
             
