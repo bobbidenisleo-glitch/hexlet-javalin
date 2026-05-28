@@ -43,8 +43,9 @@ public final class HelloWorld {
         var dataSource = new HikariDataSource(hikariConfig);
         BaseRepository.dataSource = dataSource;
 
-        // Инициализация схемы БД только для H2
+        // Инициализация схемы БД
         if (dbUrl == null || !dbUrl.contains("postgresql")) {
+            // H2: создаём таблицы из schema.sql
             var url = HelloWorld.class.getClassLoader().getResourceAsStream("schema.sql");
             var sql = new BufferedReader(new InputStreamReader(url))
                 .lines()
@@ -53,6 +54,33 @@ public final class HelloWorld {
             try (var connection = dataSource.getConnection();
                  var statement = connection.createStatement()) {
                 statement.execute(sql);
+            }
+        } else {
+            // PostgreSQL: создаём таблицы, если их нет
+            try (var connection = dataSource.getConnection();
+                 var statement = connection.createStatement()) {
+                
+                String createUsersTable = """
+                    CREATE TABLE IF NOT EXISTS users (
+                        id BIGSERIAL PRIMARY KEY,
+                        first_name VARCHAR(255) NOT NULL,
+                        last_name VARCHAR(255) NOT NULL,
+                        email VARCHAR(255) NOT NULL UNIQUE,
+                        password VARCHAR(255) NOT NULL
+                    )
+                """;
+                statement.execute(createUsersTable);
+                
+                String createCoursesTable = """
+                    CREATE TABLE IF NOT EXISTS courses (
+                        id BIGSERIAL PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL,
+                        description TEXT
+                    )
+                """;
+                statement.execute(createCoursesTable);
+                
+                System.out.println("Tables created/verified successfully");
             }
         }
 
