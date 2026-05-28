@@ -7,7 +7,7 @@ public class NamedRoutes {
     }
 
     public static String usersPath() {
-        return "/users";  // было "/u"
+        return "/users";
     }
 
     public static String buildUserPath() {
@@ -20,5 +20,13 @@ public class NamedRoutes {
 
     public static String userPath(String id) {
         return "/users/" + id;
+    }
+
+    public static String sessionsPath() {
+        return "/sessions";
+    }
+
+    public static String buildSessionPath() {
+        return "/sessions/build";
     }
 }
