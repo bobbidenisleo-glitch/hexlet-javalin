@@ -18,14 +18,15 @@ public class SessionsController {
         String email = ctx.formParam("email");
         String password = ctx.formParam("password");
 
-        User user = UserRepository.findByEmail(email);
-        if (user == null || !Security.encrypt(password).equals(user.getPassword())) {
+        var userOptional = UserRepository.findByEmail(email);
+        
+        if (userOptional.isEmpty() || !Security.encrypt(password).equals(userOptional.get().getPassword())) {
             ctx.sessionAttribute("flash", "Неверный email или пароль");
             ctx.redirect(NamedRoutes.buildSessionPath());
             return;
         }
 
-        ctx.sessionAttribute("currentUser", user);
+        ctx.sessionAttribute("currentUser", userOptional.get());
         ctx.redirect(NamedRoutes.rootPath());
     }
 
