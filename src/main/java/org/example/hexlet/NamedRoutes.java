@@ -30,11 +30,3 @@ public class NamedRoutes {
         return "/sessions/build";
     }
 }
-
-    public static String sessionsPath() {
-        return "/sessions";
-    }
-
-    public static String buildSessionPath() {
-        return "/sessions/build";
-    }
