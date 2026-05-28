@@ -20,29 +20,39 @@ import java.util.stream.Collectors;
 
 public final class HelloWorld {
 
+    private static String getDatabaseUrl() {
+        return System.getenv().getOrDefault("DATABASE_URL", "jdbc:h2:mem:hexlet_project;DB_CLOSE_DELAY=-1;");
+    }
+
     public static void main(String[] args) throws Exception {
-        // Настройка базы данных
         var hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl("jdbc:h2:mem:hexlet_project;DB_CLOSE_DELAY=-1;");
-        hikariConfig.setUsername("sa");
-        hikariConfig.setPassword("");
+        hikariConfig.setJdbcUrl(getDatabaseUrl());
+        
+        String dbUrl = System.getenv("DATABASE_URL");
+        if (dbUrl != null && dbUrl.contains("postgresql")) {
+            hikariConfig.setDriverClassName("org.postgresql.Driver");
+        } else {
+            hikariConfig.setUsername("sa");
+            hikariConfig.setPassword("");
+        }
 
         var dataSource = new HikariDataSource(hikariConfig);
         
-        // Инициализация схемы БД
-        var url = HelloWorld.class.getClassLoader().getResourceAsStream("schema.sql");
-        var sql = new BufferedReader(new InputStreamReader(url))
-            .lines()
-            .collect(Collectors.joining("\n"));
-        
-        try (var connection = dataSource.getConnection();
-             var statement = connection.createStatement()) {
-            statement.execute(sql);
+        // Инициализация схемы БД только для H2 (не для PostgreSQL)
+        if (dbUrl == null || !dbUrl.contains("postgresql")) {
+            var url = HelloWorld.class.getClassLoader().getResourceAsStream("schema.sql");
+            var sql = new BufferedReader(new InputStreamReader(url))
+                .lines()
+                .collect(Collectors.joining("\n"));
+            
+            try (var connection = dataSource.getConnection();
+                 var statement = connection.createStatement()) {
+                statement.execute(sql);
+            }
         }
         
         BaseRepository.dataSource = dataSource;
 
-        // Настройка Javalin
         var sourceDir = Path.of("src/main/jte");
         var targetDir = Path.of("jte-classes");
         var codeResolver = new DirectoryCodeResolver(sourceDir);
@@ -53,12 +63,7 @@ public final class HelloWorld {
             config.fileRenderer(new JavalinJte(templateEngine));
         });
 
-        // Главная страница
-        app.get("/", ctx -> {
-            ctx.render("index.jte");
-        });
-
-        // Пользователи
+        app.get("/", ctx -> ctx.render("index.jte"));
         app.get("/users", UsersController::index);
         app.get("/users/build", UsersController::build);
         app.post("/users", UsersController::create);
