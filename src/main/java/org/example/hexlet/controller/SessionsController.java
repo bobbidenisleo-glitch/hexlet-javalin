@@ -6,6 +6,8 @@ import org.example.hexlet.model.User;
 import org.example.hexlet.repository.UserRepository;
 import org.example.hexlet.util.Security;
 
+import java.sql.SQLException;
+
 public class SessionsController {
 
     // GET /sessions/build — показать форму логина
@@ -18,16 +20,21 @@ public class SessionsController {
         String email = ctx.formParam("email");
         String password = ctx.formParam("password");
 
-        var userOptional = UserRepository.findByEmail(email);
-        
-        if (userOptional.isEmpty() || !Security.encrypt(password).equals(userOptional.get().getPassword())) {
-            ctx.sessionAttribute("flash", "Неверный email или пароль");
-            ctx.redirect(NamedRoutes.buildSessionPath());
-            return;
-        }
+        try {
+            var userOptional = UserRepository.findByEmail(email);
+            
+            if (userOptional.isEmpty() || !Security.encrypt(password).equals(userOptional.get().getPassword())) {
+                ctx.sessionAttribute("flash", "Неверный email или пароль");
+                ctx.redirect(NamedRoutes.buildSessionPath());
+                return;
+            }
 
-        ctx.sessionAttribute("currentUser", userOptional.get());
-        ctx.redirect(NamedRoutes.rootPath());
+            ctx.sessionAttribute("currentUser", userOptional.get());
+            ctx.redirect(NamedRoutes.rootPath());
+        } catch (SQLException e) {
+            ctx.sessionAttribute("flash", "Ошибка базы данных");
+            ctx.redirect(NamedRoutes.buildSessionPath());
+        }
     }
 
     // POST /sessions/delete — логаут
