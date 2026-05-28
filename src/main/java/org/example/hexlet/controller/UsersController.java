@@ -21,26 +21,25 @@ public class UsersController {
     // GET /users - список пользователей
     public static void index(Context ctx) {
         try {
-            System.out.println("=== UsersController.index called ===");
             List<User> users = UserRepository.getEntities();
-            System.out.println("Users count: " + users.size());
             UsersPage page = new UsersPage(users);
-            System.out.println("Rendering users/index.jte");
             ctx.render("users/index.jte", model("page", page));
-        } catch (Exception e) {
-            System.out.println("ERROR in UsersController.index: " + e.getMessage());
-            e.printStackTrace();
-            ctx.result("Error: " + e.getMessage());
+        } catch (SQLException e) {
+            ctx.result("Database error: " + e.getMessage());
         }
     }
 
     // GET /users/{id} - просмотр пользователя
     public static void show(Context ctx) {
-        Long id = ctx.pathParamAsClass("id", Long.class).get();
-        User user = UserRepository.find(id)
-            .orElseThrow(() -> new NotFoundResponse("User not found"));
-        UserPage page = new UserPage(user);
-        ctx.render("users/show.jte", model("page", page));
+        try {
+            Long id = ctx.pathParamAsClass("id", Long.class).get();
+            User user = UserRepository.find(id)
+                .orElseThrow(() -> new NotFoundResponse("User not found"));
+            UserPage page = new UserPage(user);
+            ctx.render("users/show.jte", model("page", page));
+        } catch (SQLException e) {
+            ctx.result("Database error: " + e.getMessage());
+        }
     }
 
     // GET /users/build - форма создания пользователя
