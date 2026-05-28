@@ -11,6 +11,8 @@ import gg.jte.TemplateEngine;
 import gg.jte.resolve.DirectoryCodeResolver;
 
 import org.example.hexlet.controller.UsersController;
+import org.example.hexlet.dto.MainPage;
+import org.example.hexlet.model.User;
 import org.example.hexlet.repository.BaseRepository;
 
 import java.io.BufferedReader;
@@ -37,8 +39,9 @@ public final class HelloWorld {
         }
 
         var dataSource = new HikariDataSource(hikariConfig);
-        
-        // Инициализация схемы БД только для H2 (не для PostgreSQL)
+        BaseRepository.dataSource = dataSource;
+
+        // Инициализация схемы БД только для H2
         if (dbUrl == null || !dbUrl.contains("postgresql")) {
             var url = HelloWorld.class.getClassLoader().getResourceAsStream("schema.sql");
             var sql = new BufferedReader(new InputStreamReader(url))
@@ -50,8 +53,6 @@ public final class HelloWorld {
                 statement.execute(sql);
             }
         }
-        
-        BaseRepository.dataSource = dataSource;
 
         var sourceDir = Path.of("src/main/jte");
         var targetDir = Path.of("jte-classes");
@@ -63,7 +64,14 @@ public final class HelloWorld {
             config.fileRenderer(new JavalinJte(templateEngine));
         });
 
-        app.get("/", ctx -> ctx.render("index.jte"));
+        // Главная страница
+        app.get("/", ctx -> {
+            User currentUser = ctx.sessionAttribute("currentUser");
+            MainPage page = new MainPage(currentUser != null ? currentUser.getName() : null);
+            ctx.render("index.jte", model("page", page));
+        });
+
+        // Пользователи
         app.get("/users", UsersController::index);
         app.get("/users/build", UsersController::build);
         app.post("/users", UsersController::create);
